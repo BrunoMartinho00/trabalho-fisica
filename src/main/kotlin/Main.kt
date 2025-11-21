@@ -23,7 +23,7 @@ fun main() {
     println("Bem-vindo ao meu Trabalho de Fisica");
     println("Foi-me atribuído o Cenário 8");
     printOptions()
-}
+}//
 
 fun printOptions() {
     println("\n\n");
