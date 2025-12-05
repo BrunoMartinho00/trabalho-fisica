@@ -58,7 +58,7 @@ fun printOptions() {
 }
 
 fun lerParametrosLancamento(): Pair<Double, Double>? {
-    // --- Leitura da Velocidade Inicial ---
+    // --- Leitura da Velocidade Inicial ----
     var v0: Double? = null
     while (v0 == null || v0 <= 0) {
         print("Insira a velocidade inicial (v₀ em m/s): ")
