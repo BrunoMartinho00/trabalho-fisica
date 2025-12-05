@@ -12,7 +12,7 @@ A rede tem uma altura de 5m.
 
 import kotlin.math.*
 
-const val G = 9.81 // Aceleração da gravidade em m/s²
+const val G = 9.80665 // Aceleração da gravidade em m/s²
 
 
 /*********************************************/
@@ -78,66 +78,28 @@ fun lerParametrosLancamento(): Pair<Double, Double>? {
         }
     }
 
-    verificarAcerto(v0, angulo)
+    lancamento(v0, angulo)
     // Assumimos que v0 e angulo não são nulos neste ponto
     return null
 }
 
-
-fun verificarAcerto(v0: Double, anguloGraus: Double): Pair<Boolean, Double> {
-
-    // --- 1. PREPARAÇÃO DO CÁLCULO ---
+fun lancamento(v0: Double, anguloGraus: Double) {
     val anguloRadianos = toRadians(anguloGraus)
-    val v0x = v0 * cos(anguloRadianos)
-    val v0y = v0 * sin(anguloRadianos)
 
-    // --- 2. VERIFICAÇÃO INICIAL ---
-    if (v0x <= 0) {
-        println("❌ FALHA! Motivo: Velocidade horizontal nula (Ângulo de 90° ou V₀ = 0).")
-        return Pair(false, Double.NaN)
-    }
+    val tempoVooTotal = (distanciaRede / (v0 * cos(anguloRadianos))) // Tempo de voo até chegar ao x final
 
-    // --- 3. CÁLCULO DA ALTURA EM X_REDE ---
-    val tempoFinal = distanciaRede / v0x
-    val alturaFinal = v0y * tempoFinal - 0.5 * G * tempoFinal.pow(2)
+    val alturaFinal = v0 * sin(anguloRadianos) * tempoVooTotal - (0.5 * G * (tempoVooTotal.pow(2))) // Altura Final Total
 
-    // --- 4. VERIFICAÇÃO DE ACERTO ---
-    val acerto = alturaFinal in 0.0..alturaRede
+    val tempoVoo = (2 * v0 * sin(anguloRadianos)) / G // Tempo de voo (Tempo total até atingir o chão)
 
-    // LINHA DE DEBUG
-    //println("Conseguiu?: ${acerto}     Altura Final: ${alturaFinal}")
+    val distanciaImpacto = v0 * cos(anguloRadianos) * tempoVoo // Distância de impacto (Alcance máximo)
 
-    // --- 5. ANÁLISE DO RESULTADO E IMPRESSÃO DETALHADA ---
+    println("Resultados ===============")
+    println("Tempo de voo até X=40m: ${"%.2f".format(tempoVooTotal)} s")
+    println("Altura em X=40m: ${"%.2f".format(alturaFinal)} m")
+    println("Tempo total de voo (Alcance Máximo): ${"%.2f".format(tempoVoo)} s")
+    println("Distância de impacto (Alcance Máximo): ${"%.2f".format(distanciaImpacto)} m")
+    println("===========================")
 
-    if (acerto) {
-        println("✅ SUCESSO! O jogador atinge a rede com altura de: ${"%.2f".format(alturaFinal)} m.")
-    } else {
-        println("❌ FALHA! O jogador não atinge a rede.")
-
-        if (alturaFinal > alturaRede) {
-            // Caso A: Passou por cima
-            println("   Motivo: Passou por cima da rede (Altura: ${"%.2f".format(alturaFinal)} m).")
-
-        } else {
-            // Caso B: Caiu no chão (alturaFinal <= Y_MIN_REDE)
-
-            // 5a. Cálculo da Distância Horizontal de Impacto (Alcance Total)
-            val tempoVooTotal = 2.0 * v0y / G
-            val X_impacto = v0x * tempoVooTotal
-
-            val distanciaFaltante = distanciaRede - X_impacto
-
-            if (distanciaFaltante > 0) {
-                // Caiu antes de 40m
-                println("   Motivo: Caiu antes da rede.")
-                println("   Distância que faltou: ${"%.2f".format(distanciaFaltante)} m.")
-            } else {
-                // Caiu além de 40m, mas a altura em X=40m era negativa (passou rasteiro)
-                println("   Motivo: O alcance era suficiente, mas caiu no chão após o ponto de lançamento. (Alcance total: ${"%.2f".format(X_impacto)} m).")
-            }
-        }
-    }
-
-    // Retorno do resultado principal
-    return Pair(acerto, alturaFinal)
+    return
 }
