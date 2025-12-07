@@ -20,6 +20,10 @@ const val alturaRede: Double = 5.0
 const val distanciaRede: Int = 40
 /*********************************************/
 
+const val larguraGrafico = 80
+const val alturaGrafico = 25
+val grafico = Chart(larguraGrafico, alturaGrafico)
+
 
 // Função para converter graus para radianos (necessária para as funções trigonométricas)
 fun toRadians(degrees: Double): Double = degrees * PI / 180.0
@@ -45,7 +49,7 @@ fun printOptions() {
 
     when (opcao) {
         1 -> lerParametrosLancamento()
-        2 -> println("oi")
+        2 -> lerParametrosGrafico()
         3 -> {
             println("A sair do programa.")
             return
@@ -102,4 +106,76 @@ fun lancamento(v0: Double, anguloGraus: Double) {
     println("===========================")
 
     return
+}
+
+fun lerParametrosGrafico(): Pair<Double, Double>? {
+    // --- Leitura da Velocidade Inicial ----
+    var v0: Double? = null
+    while (v0 == null || v0 <= 0) {
+        print("Insira a velocidade inicial (v₀ em m/s): ")
+        v0 = readLine()?.toDoubleOrNull()
+        if (v0 == null || v0 <= 0) {
+            println("❌ Velocidade inválida. Tente novamente.")
+        }
+    }
+
+    // --- Leitura do Ângulo de Lançamento ---
+    var angulo: Double? = null
+    while (angulo == null || angulo < 0 || angulo > 90) {
+        print("Insira o ângulo de lançamento (θ em graus, entre 0 e 90): ")
+        angulo = readLine()?.toDoubleOrNull()
+        if (angulo == null || angulo < 0 || angulo > 90) {
+            println("❌ Ângulo inválido. Tente novamente.")
+        }
+    }
+
+    desenharTrajetoria(v0, angulo, grafico)
+    // Assumimos que v0 e angulo não são nulos neste ponto
+    return null
+}
+
+fun desenharTrajetoria(v0: Double, anguloGraus: Double, grafico: Chart) {
+    val anguloRadianos = toRadians(anguloGraus)
+
+    val v0x = v0 * cos(anguloRadianos)
+    val v0y = v0 * sin(anguloRadianos)
+
+    var tempo = 0.0
+    val timeStep = 0.025 // Passo de tempo para maior suavidade na curva
+    var x: Double
+    var y = 0.0
+
+    grafico.ponto(0.0, 0.0)
+
+    while (y >= 0.0 || tempo == 0.0) {
+        x = v0x * tempo
+
+        y = v0y * tempo - 0.5 * G * tempo.pow(2)
+
+        if (y >= 0.0 || tempo <= 0.0) {
+            grafico.ponto(x, y)
+        }
+
+        if (y < 0.0 && x > distanciaRede) break
+
+        if (x >= distanciaRede && y >= 0.0 && y <= alturaRede) break
+
+        tempo += timeStep
+    }
+
+    x = distanciaRede.toDouble()
+    y = alturaRede
+
+    while (y > 0.0) {
+        grafico.ponto(x, y)
+        y-=0.1
+    }
+    grafico.ponto(--x, alturaRede)
+
+
+    grafico.draw()
+
+    println("==========================================")
+    println("Trajetória gerada com ${"%.0f".format(tempo / timeStep)} pontos.")
+    println("==========================================")
 }
