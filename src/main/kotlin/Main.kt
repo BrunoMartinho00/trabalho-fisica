@@ -87,7 +87,7 @@ fun lerParametrosLancamento(): Pair<Double, Double>? {
     return null
 }
 
-fun lancamento(v0: Double, anguloGraus: Double) {
+fun lancamento(v0: Double, anguloGraus: Double): DoubleArray {
     val anguloRadianos = toRadians(anguloGraus)
 
     val tempoVooTotal = (distanciaRede / (v0 * cos(anguloRadianos))) // Tempo de voo até chegar ao x final
@@ -103,9 +103,15 @@ fun lancamento(v0: Double, anguloGraus: Double) {
     println("Altura em X=40m: ${"%.2f".format(alturaFinal)} m")
     println("Tempo total de voo (Alcance Máximo): ${"%.2f".format(tempoVoo)} s")
     println("Distância de impacto (Alcance Máximo): ${"%.2f".format(distanciaImpacto)} m")
+    if (alturaFinal >= 0 && alturaFinal < alturaRede) {
+        println("\uD83C\uDF89 Acertou na rede!")
+
+    } else {
+        println("\uD83D\uDED1 Falhou a rede!")
+    }
     println("===========================")
 
-    return
+    return doubleArrayOf(tempoVooTotal, alturaFinal, tempoVoo, distanciaImpacto)
 }
 
 fun lerParametrosGrafico(): Pair<Double, Double>? {
@@ -144,6 +150,7 @@ fun desenharTrajetoria(v0: Double, anguloGraus: Double, grafico: Chart) {
     val timeStep = 0.025 // Passo de tempo para maior suavidade na curva
     var x: Double
     var y = 0.0
+    var alturaMaxima = 0.0
 
     grafico.ponto(0.0, 0.0)
 
@@ -154,6 +161,10 @@ fun desenharTrajetoria(v0: Double, anguloGraus: Double, grafico: Chart) {
 
         if (y >= 0.0 || tempo <= 0.0) {
             grafico.ponto(x, y)
+        }
+
+        if (y > alturaMaxima) {
+            alturaMaxima = y
         }
 
         if (y < 0.0 && x > distanciaRede) break
@@ -177,5 +188,6 @@ fun desenharTrajetoria(v0: Double, anguloGraus: Double, grafico: Chart) {
 
     println("==========================================")
     println("Trajetória gerada com ${"%.0f".format(tempo / timeStep)} pontos.")
+    println("Altura Maxima atingida: ${"%.2f".format(alturaMaxima)}m")
     println("==========================================")
 }
