@@ -54,6 +54,7 @@ fun printOptions() {
             println("A sair do programa.")
             return
         }
+        99 -> lerParametrosApresentacao()
         else -> {
             println("Opção inválida. Por favor, insira 1, 2 ou 3.")
             printOptions()
@@ -98,7 +99,7 @@ fun lancamento(v0: Double, anguloGraus: Double): DoubleArray {
 
     val distanciaImpacto = v0 * cos(anguloRadianos) * tempoVoo // Distância de impacto (Alcance máximo)
 
-    println("Resultados ===============")
+    println("\nResultados ===============")
     println("Tempo de voo até X=40m: ${"%.2f".format(tempoVooTotal)} s")
     println("Altura em X=40m: ${"%.2f".format(alturaFinal)} m")
     println("Tempo total de voo (Alcance Máximo): ${"%.2f".format(tempoVoo)} s")
@@ -190,4 +191,46 @@ fun desenharTrajetoria(v0: Double, anguloGraus: Double, grafico: Chart) {
     println("Trajetória gerada com ${"%.0f".format(tempo / timeStep)} pontos.")
     println("Altura Maxima atingida: ${"%.2f".format(alturaMaxima)}m")
     println("==========================================")
+}
+
+fun lerParametrosApresentacao(): Pair<Double, Double>? {
+    // --- Leitura da Velocidade Inicial ----
+    var v0: Double? = null
+    while (v0 == null || v0 <= 0) {
+        print("Insira a velocidade inicial (v₀ em m/s): ")
+        v0 = readLine()?.toDoubleOrNull()
+        if (v0 == null || v0 <= 0) {
+            println("❌ Velocidade inválida. Tente novamente.")
+        }
+    }
+
+    // --- Leitura do Ângulo de Lançamento ---
+    var angulo: Double? = null
+    while (angulo == null || angulo < 0 || angulo > 90) {
+        print("Insira o ângulo de lançamento (θ em graus, entre 0 e 90): ")
+        angulo = readLine()?.toDoubleOrNull()
+        if (angulo == null || angulo < 0 || angulo > 90) {
+            println("❌ Ângulo inválido. Tente novamente.")
+        }
+    }
+
+    apresentacao(v0, angulo)
+    // Assumimos que v0 e angulo não são nulos neste ponto
+    return null
+}
+
+fun apresentacao(v0: Double, anguloGraus: Double) {
+    val anguloRadianos = toRadians(anguloGraus)
+
+    val tempoVooTotal = (distanciaRede / (v0 * cos(anguloRadianos))) // Tempo de voo até chegar ao x final
+
+    val alturaFinal = v0 * sin(anguloRadianos) * tempoVooTotal - (0.5 * G * (tempoVooTotal.pow(2))) // Altura Final Total
+
+
+    println("\nResultados ===============")
+    println("Tempo de voo até X=40m: ${"%.2f".format(tempoVooTotal)} s")
+    println("Altura em X=40m: ${"%.2f".format(alturaFinal)} m")
+    println("===========================")
+
+    return
 }
